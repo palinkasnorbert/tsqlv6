@@ -2,12 +2,19 @@
 -- T-SQL Fundamentals Fourth Edition
 -- Chapter 02 - Single-Table Queries
 -- Exercises
--- © Itzik Ben-Gan 
+-- ï¿½ Itzik Ben-Gan 
 ---------------------------------------------------------------------
 
 -- 1 
 -- Return orders placed in June 2021
 -- Tables involved: TSQLV6 database, Sales.Orders table
+
+SELECT orderid,
+       orderdate,
+       custid,
+       empid
+  FROM Sales.Orders
+ WHERE orderdate >= '2021-06-01' AND orderdate < '2021-07-01';
 
 -- Desired output:
 orderid     orderdate  custid      empid
@@ -29,6 +36,12 @@ orderid     orderdate  custid      empid
 -- 2 
 -- Return orders placed on the day before the last day of the month
 -- Tables involved: Sales.Orders table
+SELECT orderid,
+       orderdate,
+       custid,
+       empid
+  FROM Sales.Orders
+ WHERE orderdate = DATEADD(day, -1, EOMONTH(orderdate));
 
 -- Desired output:
 orderid     orderdate  custid      empid
@@ -50,6 +63,9 @@ orderid     orderdate  custid      empid
 -- 3 
 -- Return employees with last name containing the letter 'e' twice or more
 -- Tables involved: HR.Employees table
+SELECT empid, firstname, lastname
+FROM HR.Employees
+WHERE lastname LIKE '%e%e%'
 
 -- Desired output:
 empid       firstname  lastname
@@ -63,6 +79,12 @@ empid       firstname  lastname
 -- Return orders with total value(qty*unitprice) greater than 10000
 -- sorted by total value
 -- Tables involved: Sales.OrderDetails table
+
+SELECT orderid, SUM(qty * unitprice) AS totalvalue
+FROM Sales.OrderDetails
+GROUP BY orderid
+HAVING SUM(qty * unitprice) > 10000
+ORDER BY totalvalue DESC
 
 -- Desired output:
 orderid     totalvalue
@@ -92,7 +114,9 @@ orderid     totalvalue
 -- For simplicity, you can assume that only English letters are used
 -- in the employee last names.
 -- Tables involved: Sales.OrderDetails table
-
+SELECT empid, lastname
+FROM HR.Employees
+WHERE lastname COLLATE Latin1_General_BIN LIKE N'[a-z]%';
 -- Desired output:
 empid       lastname
 ----------- --------------------
@@ -106,13 +130,13 @@ empid       lastname
 SELECT empid, COUNT(*) AS numorders
 FROM Sales.Orders
 WHERE orderdate < '20220501'
-GROUP BY empid;
+GROUP BY empid;  -- NP> select the employees and count their orders before May 1st 2022.
 
 -- Query 2
 SELECT empid, COUNT(*) AS numorders
 FROM Sales.Orders
 GROUP BY empid
-HAVING MAX(orderdate) < '20220501';
+HAVING MAX(orderdate) < '20220501';  -- NP> select the employees and count their orders before May 1st 2022.
 
 -- 7 
 -- Return the three ship countries with the highest average freight for orders placed in 2021
